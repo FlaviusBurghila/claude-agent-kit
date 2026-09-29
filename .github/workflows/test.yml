@@ -1,0 +1,44 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: shellcheck
+        if: runner.os == 'Linux'
+        run: shellcheck install.sh tests/install.test.sh
+      - name: hook tests
+        run: node tests/shunt.test.js
+      - name: plugin consistency tests
+        run: node tests/plugin.test.js
+      - name: installer tests
+        run: bash tests/install.test.sh
+      - name: installer tests under macOS system bash 3.2
+        if: runner.os == 'macOS'
+        run: /bin/bash tests/install.test.sh
+
+  validate-plugin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: claude plugin validate
+        run: npx -y @anthropic-ai/claude-code plugin validate --strict .

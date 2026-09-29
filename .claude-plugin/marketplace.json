@@ -1,0 +1,22 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "agent-kit",
+  "description": "claude-agent-kit: tiered subagents, orchestration rules and a read-budget hook for Claude Code",
+  "owner": {
+    "name": "Flavius Burghila",
+    "url": "https://github.com/FlaviusBurghila"
+  },
+  "plugins": [
+    {
+      "name": "agent-kit",
+      "source": "./",
+      "description": "Seven tiered subagents, orchestration rules for the main session, and a read-budget hook",
+      "category": "development",
+      "tags": [
+        "subagents",
+        "orchestration",
+        "cost"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "description": "agent-kit: orchestration rules at session start; read budget on Read and Bash",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/agent-kit/hooks/session-start.js\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Read|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/agent-kit/hooks/shunt.js\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

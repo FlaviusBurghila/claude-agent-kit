@@ -1,0 +1,14 @@
+{
+  "name": "agent-kit",
+  "displayName": "Agent Kit",
+  "version": "1.0.0",
+  "description": "Seven tiered subagents (Haiku I/O, Sonnet builder, Opus review gate), orchestration rules for the main session, and a read-budget hook",
+  "author": {
+    "name": "Flavius Burghila",
+    "url": "https://github.com/FlaviusBurghila"
+  },
+  "homepage": "https://github.com/FlaviusBurghila/claude-agent-kit",
+  "repository": "https://github.com/FlaviusBurghila/claude-agent-kit",
+  "license": "MIT",
+  "keywords": ["subagents", "orchestration", "cost", "context", "code-review", "hooks"]
+}
