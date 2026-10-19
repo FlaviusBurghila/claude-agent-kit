@@ -1,7 +1,7 @@
 ---
 name: refuter
-description: Independently verifies Builder output — diffs against the spec and checks every constraint in it against the code, re-runs the project's static checks, and reports merge-blocking defects with how to show each one fails and which way to fix it. Reports; never fixes.
-model: opus
+description: Independently reviews Builder output against the spec and re-runs static checks; reports merge-blocking defects with proof; reports, never fixes.
+model: sonnet
 effort: medium
 disallowedTools: Edit, NotebookEdit, Agent
 ---

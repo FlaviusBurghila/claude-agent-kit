@@ -11,8 +11,9 @@ Issues and pull requests are welcome.
 - **Agent files are prompts.** Prefer outcomes, stops and report shapes over procedure; don't add
   "think step by step" (use `effort:`); keep each `description` short, since every description
   costs context in every session.
-- **Mind the context cap.** The plugin injects `agent-kit/orchestration.md` through a SessionStart
-  hook, capped at 10,000 characters. `tests/plugin.test.js` fails if it grows past that.
+- **Mind the context cap.** The plugin injects `agent-kit/orchestration.md` through the SessionStart
+  hook (with `AGENT_KIT_ENGAGE_TOKENS=0`) and `engage.js`, each capped at 10,000 characters.
+  `tests/plugin.test.js` and `tests/engage.test.js` fail if the payload grows past that.
 - **Cite what you claim.** Cost or model-behavior claims in the README need a primary source in
   its Sources list.
 

@@ -1,6 +1,6 @@
 ---
 name: researcher
-description: Reads docs and source and returns verified facts with a source for each, reconciling what documents claim against what the code does; flags anything it could not confirm, with where it looked
+description: Reads docs and source and returns verified facts with a source for each; flags anything it could not confirm.
 model: sonnet
 effort: medium
 disallowedTools: Edit, NotebookEdit, Agent

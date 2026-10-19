@@ -1,6 +1,6 @@
 ---
 name: debugger
-description: Hard debugging only — root-causes a failure the Builder and Refuter could not explain, and returns the mechanism with evidence plus the smallest fix as a Builder-ready brief
+description: Hard debugging only: root-causes a failure others could not explain; returns the mechanism, evidence and a Builder-ready fix brief.
 model: opus
 effort: high
 disallowedTools: Agent

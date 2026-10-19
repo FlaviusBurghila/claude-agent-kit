@@ -1,6 +1,6 @@
 ---
 name: bulk-reader
-description: Reads what the Orchestrator should not load — a file over the read threshold (350 lines by default), a question that spans three or more files, or a large diff — and answers ONE question about it in path:line bullets; never returns file contents. I/O only, not for judging correctness.
+description: Answers ONE question about a file over the read threshold, a multi-file question or a large diff, in path:line bullets; I/O only, never judges.
 model: haiku
 effort: medium
 maxTurns: 20

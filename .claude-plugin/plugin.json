@@ -1,7 +1,7 @@
 {
   "name": "agent-kit",
   "displayName": "Agent Kit",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Seven tiered subagents (Haiku I/O, Sonnet builder, Opus review gate), orchestration rules for the main session, and a read-budget hook",
   "author": {
     "name": "Flavius Burghila",

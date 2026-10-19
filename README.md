@@ -39,7 +39,7 @@ script also needs macOS, Linux or WSL, bash, and `curl` and `tar` (or git).
 | `code-writer` | `haiku` | medium, `maxTurns` 30 | writes predictable output (scaffolds, fixtures, stubs) from a spec and a reference file |
 | `researcher` | `sonnet` | medium | reads docs and source, returns verified facts with sources; flags what it could not confirm |
 | `builder` | `sonnet` | medium | implements from a written spec; returns a constraint ledger |
-| `refuter` | `opus` | medium | independently reviews the Builder's diff against every constraint in the spec |
+| `refuter` | `sonnet` (Opus for risky slices) | medium | independently reviews the Builder's diff against every constraint in the spec; skipped for small diffs that pass their tests |
 | `debugger` | `opus` | high | hard root-cause work only |
 
 The plugin names the agents `agent-kit:scout`, `agent-kit:builder` and so on; the install script
@@ -53,10 +53,19 @@ flutter_rust_bridge, TypeScript/Node, Python and Go.
 ## How it works
 
 The orchestration rules tell the main session (the Orchestrator) how to brief, delegate and
-review. The plugin loads them with a SessionStart hook that reaches only the main session; the
-install script loads them with an `@` import in CLAUDE.md. They do not depend on the project's
-CLAUDE.md or `CLAUDE.template.md`. Run `/context` and look under "Memory files" to confirm they
-loaded. The workers don't spawn agents of their own (`disallowedTools: Agent`), so every
+review. The plugin's SessionStart hook reaches only the main session and injects a short stub; a
+UserPromptSubmit hook loads the full rules once the context passes 80,000 tokens (set
+`AGENT_KIT_ENGAGE_TOKENS` to change it; `0` loads them at session start, the old behavior). The
+rules re-engage after compact or clear. The install script loads them always, with an `@` import
+in CLAUDE.md; the hooks stay quiet when they find that import. A run that does not load user
+memory (`--setting-sources project,local`, SDK `settingSources` without `user`) should set
+`AGENT_KIT_IGNORE_SCRIPT_INSTALL=1`, or the plugin's hooks stay quiet and no rules load. The rules engage on the next prompt after the threshold is crossed, so a single
+long headless `claude -p` turn keeps the stub (the read-budget hook applies from the first call).
+After a compact they re-engage on the first prompt (the last usage recorded is the pre-compact
+size); that is intended, since compaction drops them. They do not depend on the project's
+CLAUDE.md or `CLAUDE.template.md`. To confirm they loaded, run `/context` and look under "Memory
+files" (script install); with the plugin they appear once the context passes the threshold, or
+set `AGENT_KIT_ENGAGE_TOKENS=0`. The workers don't spawn agents of their own (`disallowedTools: Agent`), so every
 delegation goes through the Orchestrator.
 
 Project facts (verify commands, test policy, excluded paths, generated files, traps) live in the
@@ -80,8 +89,22 @@ threshold, but delegates to Claude Code subagents, so it needs no external CLI o
 is a separate Node.js implementation. It also counts ranged reads, `sed -n`, `git show` and
 multi-file `cat`, and it applies to the main session and selected subagents.
 
-The orchestration side follows Cognition (see Sources): an agent run's cost is dominated by how
-many turns the lead model takes, how much context it carries, and what it declines to do itself.
+The orchestration side draws on Cognition (see Sources). In their measurements the lead model that
+cost less took fewer turns, carried less context, handed work off early with briefs that state
+constraints rather than code, and made few edits itself; short tasks barely delegated, and forcing
+delegation lowered quality. Their review step was a cheap diff check, not a second expensive pass.
+
+### When this helps
+
+The kit pays off when a session would otherwise fill its context: large files, many files, long
+sessions, smaller context windows. On short tasks it should cost about the same as a plain session,
+and it does nothing extra. An independent benchmark
+([clone45/claude-agent-kit-benchmark](https://github.com/clone45/claude-agent-kit-benchmark))
+measured version 1.0.0, which loaded the full rules into every session, at 21 to 26 percent more
+per task than plain Opus 5.5 on short tasks, with the same quality. A rerun of its click phase on
+1.1.0 (102 runs) measured 7 percent more ($0.264 against $0.246 per task, inside the run-to-run
+spread), 50 of 51 runs passing in each condition. Neither run reached the conditions above, so
+the savings side is still unmeasured.
 
 ## Install for a team
 

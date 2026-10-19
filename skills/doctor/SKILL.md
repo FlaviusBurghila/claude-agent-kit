@@ -14,7 +14,8 @@ what you saw, and for anything but OK the fix.
    budget and the orchestration rules silently do nothing.
 2. **Hooks run** — pipe `{}` into `node "${CLAUDE_PLUGIN_ROOT}/agent-kit/hooks/session-start.js"`:
    it must print JSON with `additionalContext`, or print nothing only when check 4 finds a
-   script install.
+   script install. Then run it with `AGENT_KIT_ENGAGE_TOKENS=0` (full rules, `# Orchestration
+   rules`) and pipe `{}` into `engage.js` (prints nothing: no `session_id`, so quiet).
 3. **Claude Code version** — `claude --version`: 2.1.293 or later lets `haiku` mean Haiku 5.5 on
    the Anthropic API; under 2.1.246, `maxTurns` partial results are missing.
 4. **Script install alongside the plugin** — look for `builder.md` in `~/.claude/agents/` and

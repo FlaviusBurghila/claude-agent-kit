@@ -64,8 +64,16 @@ const cfg = path.join(tmp, 'cfg');
 const proj = path.join(tmp, 'proj');
 fs.mkdirSync(cfg); fs.mkdirSync(proj);
 const base = { CLAUDE_PLUGIN_ROOT: ROOT, CLAUDE_CONFIG_DIR: cfg, CLAUDE_PROJECT_DIR: proj };
+const stub = sessionStart(base);
+check('SessionStart stub is under 600 chars', stub.length > 0 && stub.length < 600, `${stub.length} chars`);
+check('SessionStart stub names every agent with the plugin scope', agentFiles.every((f) => stub.includes(`\`${plugin.name}:${f.slice(0, -3)}\``)));
+check('SessionStart stub omits the rules', !stub.includes('# Orchestration rules'));
+check('SessionStart stub prints the threshold', stub.includes('80000 tokens'));
+check('hooks.json registers engage.js on UserPromptSubmit',
+  (hooks.UserPromptSubmit || []).some((e) => e.hooks.some((h) => h.command.includes('agent-kit/hooks/engage.js'))));
+base.AGENT_KIT_ENGAGE_TOKENS = '0';
 const ctx = sessionStart(base);
-check('SessionStart injects the orchestration rules', ctx.includes('# Orchestration rules'));
+check('SessionStart injects the orchestration rules when the threshold is 0', ctx.includes('# Orchestration rules'));
 check(`SessionStart payload under ${CONTEXT_CAP} chars`, ctx.length < CONTEXT_CAP, `${ctx.length} chars`);
 check('SessionStart names every agent with the plugin scope', agentFiles.every((f) => ctx.includes(`\`${plugin.name}:${f.slice(0, -3)}\``)));
 fs.writeFileSync(path.join(proj, 'CLAUDE.md'), '# P\n\n<!-- claude-agent-kit:begin -->\n@.claude/agent-kit/orchestration.md\n<!-- claude-agent-kit:end -->\n');

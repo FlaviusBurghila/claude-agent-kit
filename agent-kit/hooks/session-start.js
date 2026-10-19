@@ -1,57 +1,42 @@
 #!/usr/bin/env node
 // session-start.js — SessionStart hook of the agent-kit plugin.
 //
-// Puts agent-kit/orchestration.md into the main session's context, prefixed with
-// the plugin-scoped agent names. SessionStart context reaches the main session
-// only, so subagents keep their own prompt and do not pay for the Orchestrator's
-// rules. Script installs load the same file through a CLAUDE.md import instead;
-// when that import is present this hook prints nothing, so it is never loaded twice.
+// By default prints a short stub naming the plugin's scoped agents; engage.js
+// (UserPromptSubmit) loads agent-kit/orchestration.md once the context passes
+// AGENT_KIT_ENGAGE_TOKENS. With that set to 0 this hook injects the full rules
+// itself. On compact or clear it forgets that engage.js already fired, so the
+// rules come back. SessionStart context reaches the main session only, so
+// subagents keep their own prompt. Script installs load the same file through a
+// CLAUDE.md import instead; when that import is present this hook prints nothing,
+// so it is never loaded twice.
 //
 // Claude Code caps hook context at 10,000 characters (tests/plugin.test.js
 // checks the payload stays under it). Fails open: any error prints nothing.
 'use strict';
 
 const fs = require('fs');
-const os = require('os');
-const path = require('path');
+const lib = require('./lib');
 
-const ROOT = process.env.CLAUDE_PLUGIN_ROOT || path.join(__dirname, '..', '..');
-const MARK = '<!-- claude-agent-kit:begin -->';
-
-function pluginName() {
-  try {
-    return JSON.parse(fs.readFileSync(path.join(ROOT, '.claude-plugin', 'plugin.json'), 'utf8')).name;
-  } catch { return 'agent-kit'; }
-}
-
-function agentNames() {
-  return fs.readdirSync(path.join(ROOT, 'agents'))
-    .filter((f) => f.endsWith('.md'))
-    .map((f) => f.slice(0, -3))
-    .sort();
-}
-
-function hasScriptInstall(projectDir) {
-  const config = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
-  const files = [path.join(config, 'CLAUDE.md')];
-  if (projectDir) files.push(path.join(projectDir, 'CLAUDE.md'), path.join(projectDir, '.claude', 'CLAUDE.md'));
-  return files.some((f) => {
-    try { return fs.readFileSync(f, 'utf8').includes(MARK); } catch { return false; }
-  });
+function stub(tokens) {
+  return `The ${lib.pluginName()} plugin is enabled. Its agents are ${lib.scopedIds()}; pass that scoped name ` +
+    'as `subagent_type`. The full orchestration rules load automatically once this session\'s context passes ' +
+    `${tokens} tokens; until then work normally. For a file over the read threshold, use the bulk-reader ` +
+    'agent or a ranged Read (offset/limit).';
 }
 
 function build(projectDir) {
-  if (hasScriptInstall(projectDir)) return '';
-  const name = pluginName();
-  const ids = agentNames().map((a) => `\`${name}:${a}\``).join(', ');
-  const body = fs.readFileSync(path.join(ROOT, 'agent-kit', 'orchestration.md'), 'utf8');
-  return `The ${name} plugin is enabled. Its agents are ${ids}; pass that scoped name as ` +
-    '`subagent_type`. The rules below refer to them by role.\n\n' + body;
+  if (lib.hasScriptInstall(projectDir)) return '';
+  const tokens = lib.engageTokens();
+  return tokens === 0 ? lib.fullRules() : stub(tokens);
 }
 
 function main() {
   let input = {};
   try { input = JSON.parse(fs.readFileSync(0, 'utf8') || '{}'); } catch { /* no stdin */ }
+  if (input.source === 'compact' || input.source === 'clear') {
+    const state = lib.statePath(input.session_id);
+    if (state) fs.rmSync(state, { force: true });
+  }
   const context = build(process.env.CLAUDE_PROJECT_DIR || input.cwd || '');
   if (!context) return;
   process.stdout.write(JSON.stringify({

@@ -1,7 +1,7 @@
 # Orchestration rules (shared)
 
 These rules are for the main session (the Orchestrator). The kit loads them either through its
-plugin's SessionStart hook or through an `@` import in CLAUDE.md. A subagent that sees them
+plugin's hooks or through an `@` import in CLAUDE.md. A subagent that sees them
 follows its own agent file instead; only the first two rules under "Long runs" bind it too. Project
 facts (commands, paths, traps) live in the project's `## Agent contract` section of CLAUDE.md.
 
@@ -10,8 +10,8 @@ You are the Orchestrator. Your tokens buy decisions, not keystrokes.
 ## Roles (via the Agent tool)
 
 - **Orchestrator (you):** plan, decompose, write specs, spawn agents, review reports, make
-  architecture decisions, integrate, and run the tests. Don't edit files or run state-changing
-  commands when a subagent can do it.
+  architecture decisions, integrate, and run the tests. Make a small change yourself (one or two
+  files, under about 150 changed lines, no extra reading); the Builder is for larger slices.
 - **Scout** (haiku): finds files, symbols, call sites and references; returns paths and line numbers only.
   Don't accept "no other call sites exist" unless it ran two independent searches. Use it, not
   the built-in Explore, which runs on your model.
@@ -21,8 +21,10 @@ You are the Orchestrator. Your tokens buy decisions, not keystrokes.
   each hard constraint with the `path:line` that meets it. For a slice holding a design decision
   the spec cannot settle, or after the Refuter fails the same slice twice, pass `model: "opus"`
   (its `effort: medium` carries over).
-- **Refuter** (opus): independently reviews the Builder's diff. "Done" from a Builder is never
-  accepted at face value. A _blocking_ finding is a defect it would block the merge for, with
+- **Refuter** (sonnet): independently reviews the Builder's diff. "Done" from a Builder is never
+  accepted at face value, but a small diff whose tests you ran and passed needs no Refuter. Pass
+  `model: "opus"` for security, data migrations, concurrency, public API changes, or a slice
+  that already failed review once. A _blocking_ finding is a defect it would block the merge for, with
   `path:line`, why, and how to show it fails; every other finding is still reported, under its
   own heading.
 - **Debugger** (opus): hard debugging only.
@@ -79,8 +81,8 @@ A file loaded into this context stays in the prompt for every later turn.
 
 ## Delegate like a manager, not a micromanager
 
-A run's cost is dominated by your own turns, the context you carry, and what you decline to do
-yourself, far more than by price per token.
+Delegation does not replace your work: you still brief, read the report and review the diff, and
+the subagent's cost comes on top. It pays only when it keeps more out of your context than that.
 
 - **Hand off early.** On an unfamiliar task the first action can be a Scout or Researcher brief.
   After a report, read a range only to edit it or to check the one claim a decision rests on.
@@ -88,8 +90,8 @@ yourself, far more than by price per token.
   every hard constraint (complexity bounds, invariants, contracts, what must not change), the edge
   cases, the tests that must pass, and what done looks like. If you are dictating file contents,
   that is Code-writer work.
-- **Review the diff, not the files.** `git diff`, the ledger and the Refuter's report are the
-  review. A defect goes back as another Builder brief (the Refuter's fix direction, or its
+- **Review the diff, not the files.** `git diff`, the ledger and the Refuter's report (when one
+  ran) are the review. A defect goes back as another Builder brief (the Refuter's fix direction, or its
   _Simpler_ list as "try these in order; keep the first that passes"), not as your own rewrite.
 - **Don't delegate where there is nothing to gain:** a change shorter than its brief, or a serial
   debugging chain whose built-up context is the work (keep it, or give it to the Debugger).

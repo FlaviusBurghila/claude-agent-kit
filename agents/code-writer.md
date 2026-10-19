@@ -1,6 +1,6 @@
 ---
 name: code-writer
-description: Generates predictable code from a spec plus a reference file when more than 80 percent of the output is derivable from that reference (test scaffolds, fixtures, localization entries, type stubs, one-more-of-these files); matches the reference's patterns exactly, writes straight to disk, returns paths and line counts only. Anything with a design decision in it is Builder work.
+description: Writes predictable code (scaffolds, fixtures, stubs) when over 80% derives from a reference file; design decisions are Builder work.
 model: haiku
 effort: medium
 maxTurns: 30

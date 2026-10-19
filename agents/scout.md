@@ -1,6 +1,6 @@
 ---
 name: scout
-description: Finds files, symbols, call sites and references and returns paths with line numbers only — no contents, no summaries. Use it to locate code before anything reads or edits it.
+description: Finds files, symbols and call sites and returns paths with line numbers only, no contents; use it to locate code before reading or editing.
 model: haiku
 effort: medium
 maxTurns: 25

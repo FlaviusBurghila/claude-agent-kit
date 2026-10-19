@@ -1,13 +1,24 @@
 {
-  "description": "agent-kit: orchestration rules at session start; read budget on Read and Bash",
+  "description": "agent-kit: orchestration rules once context grows; read budget on Read and Bash",
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "startup|resume|clear|compact",
+        "matcher": "startup|resume|clear|compact|fork",
         "hooks": [
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/agent-kit/hooks/session-start.js\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/agent-kit/hooks/engage.js\"",
             "timeout": 10
           }
         ]

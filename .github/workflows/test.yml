@@ -25,6 +25,8 @@ jobs:
         run: shellcheck install.sh tests/install.test.sh
       - name: hook tests
         run: node tests/shunt.test.js
+      - name: engage hook tests
+        run: node tests/engage.test.js
       - name: plugin consistency tests
         run: node tests/plugin.test.js
       - name: installer tests

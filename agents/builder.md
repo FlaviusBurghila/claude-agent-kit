@@ -1,6 +1,6 @@
 ---
 name: builder
-description: Implements code from a written spec to a staff-engineer bar, changing only the files it lists; verifies with the project's static checks, never runs tests unless the project allows it, and returns a constraint ledger plus the test files for the Orchestrator to run
+description: Implements a written spec in the listed files; never runs tests unless the project allows it; returns a constraint ledger and the tests to run.
 model: sonnet
 effort: medium
 disallowedTools: Agent
